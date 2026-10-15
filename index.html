@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZN 5G Smartwatch Simulator - YouTube Edition</title>
+  <title>ZN 5G Smartwatch Simulator</title>
   <style>
     * {
       box-sizing: border-box;
@@ -15,7 +15,7 @@
     }
 
     body {
-      background: #060709;
+      background: #090a0f;
       color: #fff;
       display: flex;
       justify-content: center;
@@ -24,22 +24,22 @@
       overflow: hidden;
     }
 
-    /* Apple Watch Ultra Casing */
+    /* Apple Watch Ultra Titanium Casing */
     .watch-casing {
       width: 335px;
       height: 410px;
-      background: linear-gradient(145deg, #42454e, #1c1e23);
+      background: linear-gradient(145deg, #3a3d45, #16181d);
       border-radius: 56px;
       padding: 16px;
       position: relative;
       box-shadow: 
         0 35px 75px rgba(0, 0, 0, 0.95),
-        inset 0 2px 4px rgba(255, 255, 255, 0.3),
+        inset 0 2px 4px rgba(255, 255, 255, 0.25),
         inset 0 -3px 5px rgba(0, 0, 0, 0.85);
-      border: 2px solid #525560;
+      border: 2px solid #4a4d58;
     }
 
-    /* Hardware Buttons */
+    /* Physical Hardware Buttons */
     .crown-btn {
       position: absolute;
       right: -13px;
@@ -82,7 +82,7 @@
     }
     .action-btn:active { transform: translateX(2px); }
 
-    /* Screen Glass */
+    /* Screen Glass Container */
     .watch-screen {
       width: 100%;
       height: 100%;
@@ -107,12 +107,6 @@
       gap: 16px;
     }
 
-    .boot-logo-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
     .zn-text {
       font-size: 58px;
       font-weight: 900;
@@ -122,7 +116,7 @@
     }
 
     .fg-text {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 800;
       color: #38bdf8;
       letter-spacing: 5px;
@@ -145,7 +139,7 @@
       transition: width 0.15s linear;
     }
 
-    /* View Screens Base */
+    /* View Base */
     .view {
       position: absolute;
       inset: 0;
@@ -160,7 +154,7 @@
       display: flex;
     }
 
-    /* Top Status Bar */
+    /* Status Bar */
     .status-bar {
       height: 26px;
       padding: 0 16px;
@@ -173,7 +167,7 @@
       background: linear-gradient(180deg, rgba(0,0,0,0.7), transparent);
     }
 
-    /* Pull-down Control Center */
+    /* Control Center Drawer */
     .quick-settings {
       position: absolute;
       top: -100%;
@@ -350,7 +344,7 @@
       margin-top: 2px;
     }
 
-    /* Android Dialer UI */
+    /* Android Phone Dialer UI */
     .dialer-container {
       flex: 1;
       display: flex;
@@ -616,7 +610,7 @@
         </div>
       </div>
 
-      <!-- Heart Rate & Health Sensor -->
+      <!-- Heart Rate Sensor -->
       <div class="view" id="heartView">
         <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px;">
           <div style="font-size: 46px;">❤️</div>
@@ -625,7 +619,7 @@
         </div>
       </div>
 
-      <!-- Bluetooth Device Manager View -->
+      <!-- Bluetooth Manager -->
       <div class="view" id="btView">
         <div style="padding: 12px;">
           <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #5856d6;">📶 Web Bluetooth</div>
@@ -635,7 +629,7 @@
         </div>
       </div>
 
-      <!-- Calculator View -->
+      <!-- Calculator -->
       <div class="view" id="calcView">
         <div style="padding: 10px; display: flex; flex-direction: column; height: 100%;">
           <div id="calcDisplay" style="text-align: right; font-size: 20px; font-weight: bold; margin-bottom: 8px; height: 28px;">0</div>
@@ -656,7 +650,7 @@
         </div>
       </div>
 
-      <!-- Messages View -->
+      <!-- Messages -->
       <div class="view" id="msgView">
         <div style="padding: 12px; font-size: 11px;">
           <div style="font-weight: bold; color: #34c759; margin-bottom: 8px;">📩 Messages</div>
@@ -667,7 +661,7 @@
         </div>
       </div>
 
-      <!-- Stopwatch View -->
+      <!-- Stopwatch -->
       <div class="view" id="stopwatchView">
         <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px;">
           <div style="font-size: 32px; font-weight: bold;" id="swTimer">00:00.0</div>
@@ -675,7 +669,7 @@
         </div>
       </div>
 
-      <!-- Alarm View -->
+      <!-- Alarm -->
       <div class="view" id="alarmView">
         <div style="padding: 12px; font-size: 11px;">
           <div style="font-weight: bold; color: #ff2d55; margin-bottom: 8px;">⏰ Alarms</div>
@@ -686,7 +680,7 @@
         </div>
       </div>
 
-      <!-- Photos Gallery View -->
+      <!-- Gallery -->
       <div class="view" id="galleryView">
         <div style="padding: 10px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
           <div style="background: #333; height: 60px; border-radius: 6px; display: flex; justify-content: center; align-items: center;">🖼️ Photo 1</div>
@@ -694,7 +688,7 @@
         </div>
       </div>
 
-      <!-- Camera Remote View -->
+      <!-- Camera Remote -->
       <div class="view" id="cameraView">
         <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px;">
           <div style="font-size: 40px;">📷</div>
@@ -702,7 +696,7 @@
         </div>
       </div>
 
-      <!-- Settings View -->
+      <!-- Settings -->
       <div class="view" id="settingsView">
         <div style="padding: 12px; font-size: 11px;">
           <div style="font-weight: bold; color: #aaa; margin-bottom: 8px;">⚙️ Settings</div>
