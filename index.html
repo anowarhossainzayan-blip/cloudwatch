@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZN 5G Smartwatch Simulator - YouTube Edition</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background: #060709;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Apple Watch Ultra Casing */
+    .watch-casing {
+      width: 335px;
+      height: 410px;
+      background: linear-gradient(145deg, #42454e, #1c1e23);
+      border-radius: 56px;
+      padding: 16px;
+      position: relative;
+      box-shadow: 
+        0 35px 75px rgba(0, 0, 0, 0.95),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3),
+        inset 0 -3px 5px rgba(0, 0, 0, 0.85);
+      border: 2px solid #525560;
+    }
+
+    /* Hardware Buttons */
+    .crown-btn {
+      position: absolute;
+      right: -13px;
+      top: 75px;
+      width: 13px;
+      height: 52px;
+      background: linear-gradient(90deg, #585c67, #212328);
+      border-radius: 0 6px 6px 0;
+      cursor: pointer;
+      box-shadow: 2px 0 6px rgba(0,0,0,0.7);
+      border: 1px solid #42454e;
+    }
+    .crown-btn:active { transform: translateX(-2px); }
+
+    .power-btn {
+      position: absolute;
+      right: -13px;
+      top: 175px;
+      width: 11px;
+      height: 65px;
+      background: linear-gradient(90deg, #3a3c44, #191a1e);
+      border-radius: 0 5px 5px 0;
+      cursor: pointer;
+      box-shadow: 2px 0 6px rgba(0,0,0,0.7);
+      border: 1px solid #2d2f35;
+    }
+    .power-btn:active { transform: translateX(-2px); }
+
+    .action-btn {
+      position: absolute;
+      left: -13px;
+      top: 120px;
+      width: 12px;
+      height: 60px;
+      background: linear-gradient(270deg, #ff5e00, #cc4b00);
+      border-radius: 6px 0 0 6px;
+      cursor: pointer;
+      box-shadow: -2px 0 6px rgba(0,0,0,0.5);
+      border: 1px solid #e65500;
+    }
+    .action-btn:active { transform: translateX(2px); }
+
+    /* Screen Glass */
+    .watch-screen {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      border-radius: 42px;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid #0f1013;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.95);
+    }
+
+    /* Boot Sequence Screen */
+    .boot-screen {
+      position: absolute;
+      inset: 0;
+      background: #000;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .boot-logo-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .zn-text {
+      font-size: 58px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: 3px;
+      text-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
+    }
+
+    .fg-text {
+      font-size: 15px;
+      font-weight: 800;
+      color: #38bdf8;
+      letter-spacing: 5px;
+      margin-top: -6px;
+    }
+
+    .progress-bar {
+      width: 140px;
+      height: 4px;
+      background: #222;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #ffffff, #38bdf8);
+      transition: width 0.15s linear;
+    }
+
+    /* View Screens Base */
+    .view {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      background: #000;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .view.active {
+      display: flex;
+    }
+
+    /* Top Status Bar */
+    .status-bar {
+      height: 26px;
+      padding: 0 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 600;
+      z-index: 100;
+      background: linear-gradient(180deg, rgba(0,0,0,0.7), transparent);
+    }
+
+    /* Pull-down Control Center */
+    .quick-settings {
+      position: absolute;
+      top: -100%;
+      left: 0;
+      right: 0;
+      height: 82%;
+      background: rgba(22, 22, 24, 0.94);
+      backdrop-filter: blur(20px);
+      border-radius: 0 0 32px 32px;
+      z-index: 500;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: top 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .quick-settings.open {
+      top: 0;
+    }
+
+    .qs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .qs-tile {
+      background: rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 10px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .qs-tile.active {
+      background: #0a84ff;
+    }
+
+    /* Watch Face Display */
+    .watch-face {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .clock-time {
+      font-size: 62px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+      letter-spacing: -1.5px;
+      text-shadow: 0 4px 15px rgba(0,0,0,0.85);
+    }
+
+    .clock-date {
+      font-size: 14px;
+      color: #ff3b30;
+      font-weight: 700;
+      margin-top: 6px;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.85);
+    }
+
+    /* App Launcher Grid */
+    .app-grid {
+      flex: 1;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      align-content: start;
+      justify-items: center;
+      overflow-y: auto;
+    }
+
+    .app-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 22px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      transition: transform 0.12s ease;
+    }
+    .app-icon:active { transform: scale(0.88); }
+
+    /* YouTube UI */
+    .youtube-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #0f0f0f;
+      color: #fff;
+    }
+
+    .yt-header {
+      background: #212121;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #333;
+    }
+
+    .yt-search-bar {
+      background: #121212;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      width: 100%;
+    }
+
+    .yt-search-bar input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-size: 11px;
+      width: 100%;
+    }
+
+    .yt-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+    }
+
+    .yt-video-card {
+      background: #181818;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .yt-thumb {
+      height: 75px;
+      background: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+    }
+
+    .yt-info {
+      padding: 6px 8px;
+    }
+
+    .yt-title {
+      font-size: 10px;
+      font-weight: bold;
+      line-height: 1.2;
+    }
+
+    .yt-meta {
+      font-size: 8px;
+      color: #aaa;
+      margin-top: 2px;
+    }
+
+    /* Android Dialer UI */
+    .dialer-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px 16px;
+      justify-content: space-between;
+      background: #000;
+    }
+
+    .dialer-display {
+      font-size: 22px;
+      text-align: center;
+      color: #fff;
+      height: 36px;
+      border-bottom: 1px solid #222;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+
+    .dialer-pad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      justify-items: center;
+    }
+
+    .dial-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #2c2c2e;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .dial-btn.call {
+      background: #34c759;
+      grid-column: 2;
+    }
+
+    /* Google Play Store */
+    .playstore-container {
+      flex: 1;
+      background: #121212;
+      padding: 10px;
+      overflow-y: auto;
+    }
+
+    .ps-header {
+      font-size: 13px;
+      font-weight: bold;
+      color: #01875f;
+      margin-bottom: 10px;
+    }
+
+    .ps-app-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #1e1e1e;
+      padding: 8px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+
+    .ps-app-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .ps-app-info { flex: 1; }
+    .ps-app-name { font-size: 11px; font-weight: bold; }
+
+    .ps-app-btn {
+      background: #01875f;
+      color: #fff;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* Calculator */
+    .calc-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      padding: 10px;
+    }
+    .calc-btn {
+      background: #333;
+      color: #fff;
+      padding: 12px;
+      border-radius: 50%;
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .calc-btn.op { background: #ff9500; }
+  </style>
+</head>
+<body>
+
+  <div class="watch-casing">
+    <!-- Physical Hardware Buttons -->
+    <div class="crown-btn" onclick="goHome()" title="Crown Button (Home/Back)"></div>
+    <div class="power-btn" onclick="togglePower()" title="Power Button (On/Off)"></div>
+    <div class="action-btn" onclick="quickAction()" title="Action Button (Health)"></div>
+
+    <div class="watch-screen" id="watchScreenContainer">
+      
+      <!-- Control Center Pull Down Drawer -->
+      <div class="quick-settings" id="quickSettingsPanel">
+        <div style="font-size: 12px; font-weight: bold; color: #fff; display: flex; justify-content: space-between;">
+          <span>Control Center</span>
+          <span onclick="toggleQuickSettings()" style="cursor: pointer;">✕</span>
+        </div>
+        <div class="qs-grid">
+          <div class="qs-tile active" onclick="this.classList.toggle('active')"><span>📶</span><span>5G Cell</span></div>
+          <div class="qs-tile active" onclick="this.classList.toggle('active')"><span>📶</span><span>Bluetooth</span></div>
+          <div class="qs-tile" onclick="this.classList.toggle('active')"><span>🌙</span><span>Silent</span></div>
+          <div class="qs-tile active" onclick="this.classList.toggle('active')"><span>🔦</span><span>Torch</span></div>
+          <div class="qs-tile" onclick="this.classList.toggle('active')"><span>🔋</span><span>Saver</span></div>
+          <div class="qs-tile" onclick="this.classList.toggle('active')"><span>✈️</span><span>Airplane</span></div>
+        </div>
+        <div style="margin-top: 6px;">
+          <div style="font-size: 9px; color: #aaa; margin-bottom: 2px;">Brightness</div>
+          <input type="range" min="20" max="100" value="100" style="width: 100%; cursor: pointer;" oninput="adjustBrightness(this.value)">
+        </div>
+      </div>
+
+      <!-- Boot Screen -->
+      <div class="boot-screen" id="bootScreen" style="display: none;">
+        <div class="boot-logo-container">
+          <div class="zn-text">ZN</div>
+          <div class="fg-text">5G ANDROID 15</div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="bootProgress"></div>
+        </div>
+      </div>
+
+      <!-- Main Watch Face View -->
+      <div class="view active" id="watchFaceView">
+        <div class="status-bar" onclick="toggleQuickSettings()">
+          <span id="statusBarTime">03:00</span>
+          <span style="color: #34c759;">⚡ 100%</span>
+        </div>
+        <div class="watch-face" onclick="openAppGrid()">
+          <div class="clock-time" id="clockDisplay">03:00</div>
+          <div class="clock-date" id="dateDisplay">THU 15 OCT</div>
+        </div>
+      </div>
+
+      <!-- App Launcher Grid -->
+      <div class="view" id="appGridView">
+        <div class="status-bar">
+          <span>Apps</span>
+          <span>03:00</span>
+        </div>
+        <div class="app-grid">
+          <div class="app-icon" style="background: #ff0000;" onclick="openApp('ytView')">▶️</div>
+          <div class="app-icon" style="background: #34c759;" onclick="openApp('dialerView')">📞</div>
+          <div class="app-icon" style="background: #01875f;" onclick="openApp('playStoreView')">🛍️</div>
+          <div class="app-icon" style="background: #ff2d55;" onclick="openApp('heartView')">❤️</div>
+          <div class="app-icon" style="background: #5856d6;" onclick="openApp('btView')">📶</div>
+          <div class="app-icon" style="background: #ff9500;" onclick="openApp('calcView')">🔢</div>
+          <div class="app-icon" style="background: #ff3b30;" onclick="openApp('msgView')">💬</div>
+          <div class="app-icon" style="background: #007aff;" onclick="openApp('stopwatchView')">⏱️</div>
+          <div class="app-icon" style="background: #ff2d55;" onclick="openApp('alarmView')">⏰</div>
+          <div class="app-icon" style="background: #af52de;" onclick="openApp('galleryView')">🖼️</div>
+          <div class="app-icon" style="background: #8e8e93;" onclick="openApp('cameraView')">📷</div>
+          <div class="app-icon" style="background: #6366f1;" onclick="openApp('settingsView')">⚙️</div>
+        </div>
+      </div>
+
+      <!-- YouTube View -->
+      <div class="view" id="ytView">
+        <div class="youtube-container">
+          <div class="yt-header">
+            <div class="yt-search-bar">
+              <span style="font-size: 10px;">🔍</span>
+              <input type="text" placeholder="Search YouTube..." onkeydown="handleYtSearch(event)">
+            </div>
+          </div>
+          <div class="yt-content" id="ytBody">
+            <div class="yt-video-card">
+              <div class="yt-thumb">🎬</div>
+              <div class="yt-info">
+                <div class="yt-title">Minecraft Survival Season 1</div>
+                <div class="yt-meta">ZN Gamer • 1.2M views</div>
+              </div>
+            </div>
+            <div class="yt-video-card">
+              <div class="yt-thumb">🎵</div>
+              <div class="yt-info">
+                <div class="yt-title">Top Music Playlist 2026</div>
+                <div class="yt-meta">Vibe Studio • 500K views</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Android Phone Dialer View -->
+      <div class="view" id="dialerView">
+        <div class="dialer-container">
+          <div class="dialer-display" id="dialDisplay"></div>
+          <div class="dialer-pad">
+            <div class="dial-btn" onclick="appendDial('1')">1</div>
+            <div class="dial-btn" onclick="appendDial('2')">2</div>
+            <div class="dial-btn" onclick="appendDial('3')">3</div>
+            <div class="dial-btn" onclick="appendDial('4')">4</div>
+            <div class="dial-btn" onclick="appendDial('5')">5</div>
+            <div class="dial-btn" onclick="appendDial('6')">6</div>
+            <div class="dial-btn" onclick="appendDial('7')">7</div>
+            <div class="dial-btn" onclick="appendDial('8')">8</div>
+            <div class="dial-btn" onclick="appendDial('9')">9</div>
+            <div class="dial-btn" onclick="appendDial('*')">*</div>
+            <div class="dial-btn" onclick="appendDial('0')">0</div>
+            <div class="dial-btn" onclick="appendDial('#')">#</div>
+            <div class="dial-btn call" onclick="makeRealCall()">📞</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Google Play Store View -->
+      <div class="view" id="playStoreView">
+        <div class="playstore-container">
+          <div class="ps-header">Google Play Store</div>
+          <div class="ps-app-card">
+            <div class="ps-app-icon" style="background: #e2136e; color:#fff;">b</div>
+            <div class="ps-app-info">
+              <div class="ps-app-name">bKash App</div>
+              <div style="font-size: 9px; color: #888;">Finance • 48 MB</div>
+            </div>
+            <button class="ps-app-btn" onclick="installApp('bKash')">Install</button>
+          </div>
+          <div class="ps-app-card">
+            <div class="ps-app-icon" style="background: #25d366;">💬</div>
+            <div class="ps-app-info">
+              <div class="ps-app-name">WhatsApp</div>
+              <div style="font-size: 9px; color: #888;">Chat • 32 MB</div>
+            </div>
+            <button class="ps-app-btn" onclick="installApp('WhatsApp')">Install</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Heart Rate & Health Sensor -->
+      <div class="view" id="heartView">
+        <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px;">
+          <div style="font-size: 46px;">❤️</div>
+          <div style="font-size: 28px; font-weight: bold; color: #ff2d55;">78 BPM</div>
+          <div style="font-size: 10px; color: #aaa;">Live Optical Pulse Sensor</div>
+        </div>
+      </div>
+
+      <!-- Bluetooth Device Manager View -->
+      <div class="view" id="btView">
+        <div style="padding: 12px;">
+          <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #5856d6;">📶 Web Bluetooth</div>
+          <button style="background: #0a84ff; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: bold; margin-bottom: 10px; cursor: pointer;" onclick="pairRealBluetooth()">Pair Device</button>
+          <div style="background: #1c1c1e; padding: 8px; border-radius: 8px; font-size: 10px; margin-bottom: 6px;">📱 Galaxy S24 Ultra (Paired)</div>
+          <div style="background: #1c1c1e; padding: 8px; border-radius: 8px; font-size: 10px;">🎧 AirPods Pro 2 (Paired)</div>
+        </div>
+      </div>
+
+      <!-- Calculator View -->
+      <div class="view" id="calcView">
+        <div style="padding: 10px; display: flex; flex-direction: column; height: 100%;">
+          <div id="calcDisplay" style="text-align: right; font-size: 20px; font-weight: bold; margin-bottom: 8px; height: 28px;">0</div>
+          <div class="calc-grid">
+            <div class="calc-btn" onclick="calcInput('7')">7</div>
+            <div class="calc-btn" onclick="calcInput('8')">8</div>
+            <div class="calc-btn" onclick="calcInput('9')">9</div>
+            <div class="calc-btn op" onclick="calcInput('+')">+</div>
+            <div class="calc-btn" onclick="calcInput('4')">4</div>
+            <div class="calc-btn" onclick="calcInput('5')">5</div>
+            <div class="calc-btn" onclick="calcInput('6')">6</div>
+            <div class="calc-btn op" onclick="calcInput('-')">-</div>
+            <div class="calc-btn" onclick="calcInput('1')">1</div>
+            <div class="calc-btn" onclick="calcInput('2')">2</div>
+            <div class="calc-btn" onclick="calcInput('3')">3</div>
+            <div class="calc-btn op" onclick="calcEval()">=</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages View -->
+      <div class="view" id="msgView">
+        <div style="padding: 12px; font-size: 11px;">
+          <div style="font-weight: bold; color: #34c759; margin-bottom: 8px;">📩 Messages</div>
+          <div style="background: #1c1c1e; padding: 8px; border-radius: 8px; margin-bottom: 6px;">
+            <b>+8801700000000</b>
+            <div style="font-size: 9px; color: #aaa;">Your ZN 5G Watch activation code is 9582.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stopwatch View -->
+      <div class="view" id="stopwatchView">
+        <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px;">
+          <div style="font-size: 32px; font-weight: bold;" id="swTimer">00:00.0</div>
+          <button style="background: #34c759; color: #fff; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold;">Start / Stop</button>
+        </div>
+      </div>
+
+      <!-- Alarm View -->
+      <div class="view" id="alarmView">
+        <div style="padding: 12px; font-size: 11px;">
+          <div style="font-weight: bold; color: #ff2d55; margin-bottom: 8px;">⏰ Alarms</div>
+          <div style="display: flex; justify-content: space-between; background: #1c1c1e; padding: 8px; border-radius: 8px;">
+            <span>07:00 AM</span>
+            <input type="checkbox" checked>
+          </div>
+        </div>
+      </div>
+
+      <!-- Photos Gallery View -->
+      <div class="view" id="galleryView">
+        <div style="padding: 10px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
+          <div style="background: #333; height: 60px; border-radius: 6px; display: flex; justify-content: center; align-items: center;">🖼️ Photo 1</div>
+          <div style="background: #444; height: 60px; border-radius: 6px; display: flex; justify-content: center; align-items: center;">🖼️ Photo 2</div>
+        </div>
+      </div>
+
+      <!-- Camera Remote View -->
+      <div class="view" id="cameraView">
+        <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px;">
+          <div style="font-size: 40px;">📷</div>
+          <button style="background: #ff3b30; color: #fff; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer;" onclick="alert('Photo Taken!')">Shutter</button>
+        </div>
+      </div>
+
+      <!-- Settings View -->
+      <div class="view" id="settingsView">
+        <div style="padding: 12px; font-size: 11px;">
+          <div style="font-weight: bold; color: #aaa; margin-bottom: 8px;">⚙️ Settings</div>
+          <div style="background: #1c1c1e; padding: 8px; border-radius: 8px; margin-bottom: 6px;">ZN 5G OS Version: Android 15</div>
+          <div style="background: #1c1c1e; padding: 8px; border-radius: 8px;">Storage: 32 GB Free</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    let isPoweredOn = true;
+    let dialNumber = "";
+    let calcExpr = "";
+    const wallpapers = [
+      "linear-gradient(135deg, #0f172a, #1e293b)",
+      "linear-gradient(135deg, #3b0764, #581c87)",
+      "linear-gradient(135deg, #064e3b, #065f46)",
+      "linear-gradient(135deg, #7c2d12, #9a3412)",
+      "linear-gradient(135deg, #172554, #1e3a8a)"
+    ];
+    let currentWallpaperIndex = 0;
+
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const timeStr = `${hours}:${minutes}`;
+      document.getElementById('clockDisplay').innerText = timeStr;
+      document.getElementById('statusBarTime').innerText = timeStr;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function goHome() {
+      if (!isPoweredOn) return;
+      document.getElementById('quickSettingsPanel').classList.remove('open');
+      showView('watchFaceView');
+    }
+
+    function quickAction() {
+      if (!isPoweredOn) return;
+      showView('heartView');
+    }
+
+    function openAppGrid() {
+      if (!isPoweredOn) return;
+      showView('appGridView');
+    }
+
+    function openApp(viewId) {
+      showView(viewId);
+    }
+
+    function showView(viewId) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active');
+    }
+
+    function toggleQuickSettings() {
+      const qs = document.getElementById('quickSettingsPanel');
+      qs.classList.toggle('open');
+    }
+
+    function adjustBrightness(val) {
+      document.getElementById('watchScreenContainer').style.filter = `brightness(${val}%)`;
+    }
+
+    function togglePower() {
+      const bootScreen = document.getElementById('bootScreen');
+      const progress = document.getElementById('bootProgress');
+
+      if (isPoweredOn) {
+        isPoweredOn = false;
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        bootScreen.style.display = 'none';
+      } else {
+        bootScreen.style.display = 'flex';
+        progress.style.width = '0%';
+        let p = 0;
+        const interval = setInterval(() => {
+          p += 10;
+          progress.style.width = p + '%';
+          if (p >= 100) {
+            clearInterval(interval);
+            bootScreen.style.display = 'none';
+            isPoweredOn = true;
+            showView('watchFaceView');
+          }
+        }, 120);
+      }
+    }
+
+    /* Swipe Gestures */
+    let touchStartX = 0;
+    const wf = document.getElementById('watchFaceView');
+    wf.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+    wf.addEventListener('touchend', e => {
+      let diff = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(diff) > 40) {
+        if (diff > 0) {
+          showView('heartView');
+        } else {
+          currentWallpaperIndex = (currentWallpaperIndex + 1) % wallpapers.length;
+          wf.style.background = wallpapers[currentWallpaperIndex];
+        }
+      }
+    });
+
+    /* Dialer Logic */
+    function appendDial(num) {
+      dialNumber += num;
+      document.getElementById('dialDisplay').innerText = dialNumber;
+    }
+
+    function makeRealCall() {
+      if (!dialNumber) return;
+      window.location.href = `tel:+880${dialNumber.replace(/^0+/, '')}`;
+    }
+
+    /* YouTube Search Logic */
+    function handleYtSearch(event) {
+      if (event.key === 'Enter') {
+        const query = event.target.value;
+        const ytBody = document.getElementById('ytBody');
+        ytBody.innerHTML = `
+          <div class="yt-video-card">
+            <div class="yt-thumb">▶️</div>
+            <div class="yt-info">
+              <div class="yt-title">${query}</div>
+              <div class="yt-meta">Search Result • YouTube Player</div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    /* Play Store Installer */
+    function installApp(name) {
+      alert(`Downloading and installing ${name} into ZN 5G Smartwatch...`);
+    }
+
+    /* Calculator Logic */
+    function calcInput(char) {
+      calcExpr += char;
+      document.getElementById('calcDisplay').innerText = calcExpr;
+    }
+
+    function calcEval() {
+      try {
+        calcExpr = String(eval(calcExpr));
+        document.getElementById('calcDisplay').innerText = calcExpr;
+      } catch(e) {
+        document.getElementById('calcDisplay').innerText = "Err";
+        calcExpr = "";
+      }
+    }
+
+    /* Web Bluetooth API */
+    async function pairRealBluetooth() {
+      if (navigator.bluetooth) {
+        try {
+          await navigator.bluetooth.requestDevice({ acceptAllDevices: true });
+        } catch(e) {
+          alert('Bluetooth search opened.');
+        }
+      } else {
+        alert('Bluetooth scanning initiated.');
+      }
+    }
+  </script>
+</body>
+</html>
